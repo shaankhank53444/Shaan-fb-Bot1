@@ -2,7 +2,7 @@ module.exports.config = {
   name: "out",
   version: "1.0.0",
   hasPermssion: 2,
-  credits: "KRISHNA-BABU",
+  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭,
   description: "Admin bole toh bot leave",
   commandCategory: "Admin",
   usages: "out",
