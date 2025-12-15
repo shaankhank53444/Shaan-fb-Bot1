@@ -1,10 +1,9 @@
-const fs = global.nodemodule["fs-extra"];
-module.exports.config = {
-  name: "bot2",
-  version: "1.0.1",
-  hasPermssion: 0,
-  credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-  description: "bot2",
+module.exports = {
+  config: {
+    name: "bot2",
+    description: "Quick reply when someone says bot",
+    usage: "",
+    credit: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
   commandCategory: "Noprefix",
   usages: "noprefix",
   cooldowns: 5,
