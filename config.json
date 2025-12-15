@@ -1,5 +1,5 @@
 {
-  "mongoURI": "",
+  "mongoURI": "mongodb+srv://bebybabu928_db_user:xgP4Pm8C16t6NDwm@krishna.hgo8no9.mongodb.net/?appName=Krishna",
   "ownerID": "61573328623221",
   "adminIDs": [
     "61573328623221",
