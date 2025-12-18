@@ -51,7 +51,7 @@ module.exports.run = async function ({ api, message, args }) {
         const isUrl = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/.test(input);
 
         if (!isUrl) {
-            processingMsg = await api.sendMessage(`🔍 Searching for: ${input}...`, threadID, messageID);
+            processingMsg = await api.sendMessage(`✅ Apki Request Jari Hai Please wait...: ${input}...`, threadID, messageID);
             const searchResult = await ytSearch(input);
             if (!searchResult || !searchResult.videos.length) {
                 if (processingMsg) api.unsendMessage(processingMsg.messageID);
@@ -155,7 +155,8 @@ module.exports.run = async function ({ api, message, args }) {
         const formattedViews = videoDetails.views ? new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(videoDetails.views) : "N/A";
 
         // Construct info message
-        let infoMsg = `🎬 Title: ${finalTitle}\n`;
+        let infoMsg = ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««
+          🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉 Title: ${finalTitle}\n`;
         if (videoDetails.duration) infoMsg += `⏱ Duration: ${videoDetails.duration}\n`;
         if (videoDetails.author) infoMsg += `👤 Channel: ${videoDetails.author}\n`;
         if (videoDetails.views) infoMsg += `👀 Views: ${formattedViews}\n`;
