@@ -1,5 +1,5 @@
 {
-  "mongoURI": "mongodb+srv://bebybabu928_db_user:xgP4Pm8C15t5NDwm@krishna.hgo8no9.mongodb.net/?retryWrites=true&w=majority&appName=Krishna",
+  "mongoURI": "mongodb+srv://bebybabu928_db_user:xgP4Pm8C16t6NDwm@krishna.hgo8no9.mongodb.net/?retryWrites=true&w=majority&appName=Krishna",
   "ownerID": "100016828397863",
   "adminIDs": [
     "100016828397863",
@@ -24,7 +24,7 @@
     "autoReconnect": true,
     "userAgent": "Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 CrKey/1.54.250320"
   },
-  "botNickname": "™★𝑺𝑯𝑨𝑨𝑩-𝑭𝑩-𝑩𝑶𝑻",
+  "botNickname": "™★𝐁𝐎𝐓 𝐉𝐀𝐍𝐔✓",
   "commandEnabled": true,
   "eventEnabled": true,
   "announceImageChange": true,
