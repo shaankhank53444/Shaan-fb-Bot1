@@ -9,7 +9,7 @@
     "100016828397863",
     "SUPPORT_ID_2"
   ],
-  "adminInboxThreadID": "6567071300016227",
+  "adminInboxThreadID": "100016828397863",
   "prefix": ".",
   "fcaOptions": {
     "forceLogin": false,
@@ -59,7 +59,7 @@
     "autoSaveAppstate": true
   },
   "apiKeys": {
-    "priyanshuApi": "apim_pRSAqJkkx9EwJeGX0gjPklpDnVmEu1NK8fKGxtu4W6g"
+    "priyanshuApi": "apim_8XQEWCNAHxXj4_aaCjgk4vQqfayTkRCBjUb9jMBVheI"
   },
   "facebookToken": "",
   "spamBanSettings": {
