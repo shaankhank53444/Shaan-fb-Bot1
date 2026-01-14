@@ -6,9 +6,9 @@ const ytSearch = require("yt-search");
 module.exports.config = {
     name: "music",
     aliases: ["yt", "ytmusic"],
-    version: "1.0.0",
+    version: "1.1.0",
     credit: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-    description: "Download music from YouTube",
+    description: "Download music from YouTube (E2EE Compatible)",
     hasPrefix: true,
     permission: 'PUBLIC',
     category: "MEDIA",
@@ -37,7 +37,7 @@ module.exports.run = async function ({ api, message, args }) {
     try {
         const isUrl = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/.test(input);
 
-        // Searching message without name
+        // Simple Searching Message
         searchingMessageInfo = await api.sendMessage(isUrl ? "🔍 Processing URL..." : "✅ Apki Request Jari Hai Please wait...", threadID, messageID);
 
         if (!isUrl) {
@@ -98,23 +98,17 @@ module.exports.run = async function ({ api, message, args }) {
         const { downloadUrl, title, filename } = response.data.data;
         const finalTitle = videoTitle || title || "Unknown Title";
 
-        try {
-            const headResponse = await axios.head(downloadUrl);
-            const contentLength = headResponse.headers["content-length"];
-            if (contentLength && parseInt(contentLength) > 30 * 1024 * 1024) {
-                if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
-                return api.sendMessage("❌ File size exceeds 30MB limit.", threadID, messageID);
-            }
-        } catch (headError) {}
-
         const formattedViews = videoDetails.views ? new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(videoDetails.views) : "N/A";
 
-        // Original Formatting (Old Style) without Links/Downloading text
+        // Info message (Title/Duration etc.) - Links aur extra text remove kar diya gaya hai
         let infoMsg = ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««\n          🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉 Title: ${finalTitle}\n`;
         if (videoDetails.duration) infoMsg += `⏱ Duration: ${videoDetails.duration}\n`;
         if (videoDetails.author) infoMsg += `👤 Artist: ${videoDetails.author}\n`;
         if (videoDetails.views) infoMsg += `👀 Views: ${formattedViews}\n`;
         if (videoDetails.ago) infoMsg += `📅 Uploaded: ${videoDetails.ago}`;
+
+        // Send Info Message first (Messenger E2EE fix)
+        await api.sendMessage(infoMsg, threadID);
 
         const tempDir = path.join(__dirname, "temporary");
         if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
@@ -138,9 +132,9 @@ module.exports.run = async function ({ api, message, args }) {
                     return fs.unlink(filePath, () => { });
                 }
 
+                // Send Only Audio File (Text hum upar bhej chuke hain)
                 api.sendMessage(
                     {
-                        body: infoMsg,
                         attachment: fs.createReadStream(filePath),
                     },
                     threadID,
