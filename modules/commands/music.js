@@ -37,7 +37,7 @@ module.exports.run = async function ({ api, message, args }) {
     try {
         const isUrl = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/.test(input);
 
-        // Sirf "Searching..." message, bina kisi naam ke
+        // Searching message without name
         searchingMessageInfo = await api.sendMessage(isUrl ? "🔍 Processing URL..." : "✅ Apki Request Jari Hai Please wait...", threadID, messageID);
 
         if (!isUrl) {
@@ -109,12 +109,12 @@ module.exports.run = async function ({ api, message, args }) {
 
         const formattedViews = videoDetails.views ? new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(videoDetails.views) : "N/A";
 
-        let infoMsg = ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««\n`;
-        infoMsg += `🥀 𝑻𝒊𝒕𝒍𝒆: ${finalTitle}\n`;
-        if (videoDetails.duration) infoMsg += `⏱ 𝑫𝒖𝒓𝒂𝒕𝒊𝒐𝒏: ${videoDetails.duration}\n`;
-        if (videoDetails.author) infoMsg += `👤 𝑨𝒓𝒕𝒊𝒔𝒕: ${videoDetails.author}\n`;
-        if (videoDetails.views) infoMsg += `👀 𝑽𝒊𝒆𝒘𝒔: ${formattedViews}\n`;
-        if (videoDetails.ago) infoMsg += `📅 𝑼𝒑𝒍𝒐𝒂𝒅𝒆𝒅: ${videoDetails.ago}`;
+        // Original Formatting (Old Style) without Links/Downloading text
+        let infoMsg = ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««\n          🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉 Title: ${finalTitle}\n`;
+        if (videoDetails.duration) infoMsg += `⏱ Duration: ${videoDetails.duration}\n`;
+        if (videoDetails.author) infoMsg += `👤 Artist: ${videoDetails.author}\n`;
+        if (videoDetails.views) infoMsg += `👀 Views: ${formattedViews}\n`;
+        if (videoDetails.ago) infoMsg += `📅 Uploaded: ${videoDetails.ago}`;
 
         const tempDir = path.join(__dirname, "temporary");
         if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
@@ -135,7 +135,6 @@ module.exports.run = async function ({ api, message, args }) {
             fs.stat(filePath, (statErr, stats) => {
                 if (statErr || !stats || stats.size === 0) {
                     if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
-                    api.sendMessage("❌ Download failed.", threadID, messageID);
                     return fs.unlink(filePath, () => { });
                 }
 
@@ -147,7 +146,6 @@ module.exports.run = async function ({ api, message, args }) {
                     threadID,
                     (err) => {
                         if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
-                        if (err) api.sendMessage("❌ Failed to send audio file.", threadID, messageID);
                         fs.unlink(filePath, () => {});
                     },
                     messageID
@@ -157,12 +155,11 @@ module.exports.run = async function ({ api, message, args }) {
 
         writer.on("error", (err) => {
             if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
-            api.sendMessage("❌ Error while downloading.", threadID, messageID);
             fs.unlink(filePath, () => { });
         });
 
     } catch (error) {
         if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
-        api.sendMessage("❌ Connection Error.", threadID, messageID);
+        api.sendMessage("❌ Connection error.", threadID, messageID);
     }
 };
