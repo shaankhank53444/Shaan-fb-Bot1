@@ -35,13 +35,15 @@ module.exports.run = async function ({ api, message, args }) {
     let searchingMessageInfo = null;
 
     try {
-        // Check if input is a URL
         const isUrl = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/.test(input);
 
+        // Sirf "Searching..." message, bina kisi naam ke
+        searchingMessageInfo = await api.sendMessage(isUrl ? "🔍 Processing URL..." : "✅ Apki Request Jari Hai Please wait...", threadID, messageID);
+
         if (!isUrl) {
-            searchingMessageInfo = await api.sendMessage(`✅ Apki Request Jari Hai Please wait..for: ${input}...`, threadID, messageID);
             const searchResult = await ytSearch(input);
             if (!searchResult || !searchResult.videos.length) {
+                if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
                 return api.sendMessage("❌ Song not found on YouTube.", threadID, messageID);
             }
             const video = searchResult.videos[0];
@@ -54,12 +56,6 @@ module.exports.run = async function ({ api, message, args }) {
                 ago: video.ago,
             };
         } else {
-            searchingMessageInfo = await api.sendMessage(`🔍 Processing URL...`, threadID, messageID);
-            // Even for URL, try to get details if possible, but basic yt-search on URL might not work the same.
-            // We can try to search the URL to get details or just proceed.
-            // For now, if it's a URL, we might miss some details unless we fetch them.
-            // Let's try to fetch details using the video ID if possible, or just skip extra details for URL input to keep it simple/fast.
-            // Or we can use yt-search with the URL which usually works.
             try {
                 const videoIdMatch = input.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
                 if (videoIdMatch) {
@@ -75,12 +71,9 @@ module.exports.run = async function ({ api, message, args }) {
                         };
                     }
                 }
-            } catch (e) {
-                // Ignore error fetching details for URL
-            }
+            } catch (e) {}
         }
 
-        // Call the API
         const apiUrl = "https://priyanshuapi.xyz/api/runner/youtube-downloader-v2/download";
         const response = await axios.post(
             apiUrl,
@@ -105,7 +98,6 @@ module.exports.run = async function ({ api, message, args }) {
         const { downloadUrl, title, filename } = response.data.data;
         const finalTitle = videoTitle || title || "Unknown Title";
 
-        // Check file size using HEAD request
         try {
             const headResponse = await axios.head(downloadUrl);
             const contentLength = headResponse.headers["content-length"];
@@ -113,38 +105,20 @@ module.exports.run = async function ({ api, message, args }) {
                 if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
                 return api.sendMessage("❌ File size exceeds 30MB limit.", threadID, messageID);
             }
-        } catch (headError) {
-            console.error("Error checking file size:", headError);
-            // Proceeding if HEAD fails, assuming size is okay or will fail later
-        }
+        } catch (headError) {}
 
-        // Format views
         const formattedViews = videoDetails.views ? new Intl.NumberFormat('en-US', { notation: "compact", compactDisplay: "short" }).format(videoDetails.views) : "N/A";
 
-        // Send info message
-        let infoMsg = ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««
-          🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉 Title: ${finalTitle}\n`;
-        if (videoDetails.duration) infoMsg += `⏱ Duration: ${videoDetails.duration}\n`;
-        if (videoDetails.author) infoMsg += `👤 Artist: ${videoDetails.author}\n`;
-        if (videoDetails.views) infoMsg += `👀 Views: ${formattedViews}\n`;
-        if (videoDetails.ago) infoMsg += `📅 Uploaded: ${videoDetails.ago}\n`;
-        infoMsg += `🔗 Source: ${videoUrl}\n`;
-        infoMsg += `📥 Download Link: ${downloadUrl}\n`;
-        infoMsg += `⏳ Downloading...`;
+        let infoMsg = ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««\n`;
+        infoMsg += `🥀 𝑻𝒊𝒕𝒍𝒆: ${finalTitle}\n`;
+        if (videoDetails.duration) infoMsg += `⏱ 𝑫𝒖𝒓𝒂𝒕𝒊𝒐𝒏: ${videoDetails.duration}\n`;
+        if (videoDetails.author) infoMsg += `👤 𝑨𝒓𝒕𝒊𝒔𝒕: ${videoDetails.author}\n`;
+        if (videoDetails.views) infoMsg += `👀 𝑽𝒊𝒆𝒘𝒔: ${formattedViews}\n`;
+        if (videoDetails.ago) infoMsg += `📅 𝑼𝒑𝒍𝒐𝒂𝒅𝒆𝒅: ${videoDetails.ago}`;
 
-        api.sendMessage(infoMsg, threadID, () => {
-            if (searchingMessageInfo) {
-                api.unsendMessage(searchingMessageInfo.messageID);
-            }
-        });
-
-        // Download file
         const tempDir = path.join(__dirname, "temporary");
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
-        // Sanitize filename
         const safeFilename = (filename || `${Date.now()}.mp3`).replace(/[^a-zA-Z0-9.-]/g, "_");
         const filePath = path.join(tempDir, safeFilename);
 
@@ -158,43 +132,37 @@ module.exports.run = async function ({ api, message, args }) {
         downloadResponse.data.pipe(writer);
 
         writer.on("finish", () => {
-            // Verify file is not empty before sending
             fs.stat(filePath, (statErr, stats) => {
                 if (statErr || !stats || stats.size === 0) {
-                    console.error("[music] Temp file is empty or unreadable, skipping send:", filePath, statErr);
-                    api.sendMessage("❌ Download failed (empty file). Please try again.", threadID, messageID);
+                    if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
+                    api.sendMessage("❌ Download failed.", threadID, messageID);
                     return fs.unlink(filePath, () => { });
                 }
 
-                // Send the file
                 api.sendMessage(
                     {
-                        body: `🎧 ${finalTitle}`,
+                        body: infoMsg,
                         attachment: fs.createReadStream(filePath),
                     },
                     threadID,
                     (err) => {
-                        if (err) {
-                            console.error("Error sending file:", err);
-                            api.sendMessage("❌ Failed to send audio file.", threadID, messageID);
-                        }
-                        // Delete file after sending (or attempting to send)
-                        fs.unlink(filePath, (unlinkErr) => {
-                            if (unlinkErr) console.error("Error deleting temp file:", unlinkErr);
-                        });
-                    }
+                        if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
+                        if (err) api.sendMessage("❌ Failed to send audio file.", threadID, messageID);
+                        fs.unlink(filePath, () => {});
+                    },
+                    messageID
                 );
             });
         });
 
         writer.on("error", (err) => {
-            console.error("Error downloading file:", err);
-            api.sendMessage("❌ Failed to download the file.", threadID, messageID);
-            fs.unlink(filePath, () => { }); // Clean up partial file
+            if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
+            api.sendMessage("❌ Error while downloading.", threadID, messageID);
+            fs.unlink(filePath, () => { });
         });
 
     } catch (error) {
-        console.error("Error in musicv4 command:", error);
-        api.sendMessage("❌ An error occurred while processing your request.", threadID, messageID);
+        if (searchingMessageInfo) api.unsendMessage(searchingMessageInfo.messageID);
+        api.sendMessage("❌ Connection Error.", threadID, messageID);
     }
 };
