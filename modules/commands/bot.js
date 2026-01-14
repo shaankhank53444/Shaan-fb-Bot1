@@ -8,9 +8,11 @@ const RESPONSE_DELAY_MS = 1500;
 const handledMessages = new Map();
 let repliesCache = null;
 
+// Is function ko update kiya gaya hai
 function shouldTrigger(body = "") {
   if (!body) return false;
-  return /\bbot\b/i.test(body);
+  // Ab ye sirf tab true hoga jab message sirf "bot" ho (spaces ignore karke)
+  return body.trim().toLowerCase() === "bot";
 }
 
 function cleanupHandledMap() {
@@ -54,7 +56,7 @@ function pickReply({ senderID, gender }) {
   }
 
   if (!Array.isArray(list) || list.length === 0) {
-    return "Hello! 👋";
+    return " assalamu alaikum everyone";
   }
 
   const index = Math.floor(Math.random() * list.length);
@@ -63,6 +65,8 @@ function pickReply({ senderID, gender }) {
 
 async function sendReply({ api, message }) {
   const { threadID, messageID, senderID, body } = message;
+  
+  // Trigger check yahan hota hai
   if (!shouldTrigger(body) || wasHandled(messageID)) {
     return;
   }
@@ -82,7 +86,7 @@ async function sendReply({ api, message }) {
 module.exports = {
   config: {
     name: "bot",
-    description: "Quick reply when someone says bot",
+    description: "Quick reply only when someone says 'bot' exactly",
     usage: "",
     credit: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
     hasPrefix: false,
@@ -97,6 +101,10 @@ module.exports = {
 
   handleEvent: async function({ api, message }) {
     if (!message?.body || wasHandled(message.messageID)) return;
+    
+    // Yahan bhi check lagana zaroori hai delay se pehle
+    if (!shouldTrigger(message.body)) return;
+
     await new Promise(resolve => setTimeout(resolve, RESPONSE_DELAY_MS));
     if (wasHandled(message.messageID)) return;
     return sendReply({ api, message });
