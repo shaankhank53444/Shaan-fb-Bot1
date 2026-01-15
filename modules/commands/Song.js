@@ -4,19 +4,19 @@ const yts = require("yt-search");
 module.exports.config = {
     name: "song",
     version: "1.5.0",
-    credits: "ARIF-BABU", // 🔐 DO NOT CHANGE
+    credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
     countDown: 5,
     role: 0,
-    description: "YouTube song downloader (Music player)",
+    description: "YouTube song downloader for MongoDB bots",
     category: "media",
     guide: "{pn} [Song Name]"
 };
 
-// 🔐 Credits Lock Check
+// 🔐 Credits Check
 function checkCredits() {
-    const correctCredits = "ARIF-BABU";
+    const correctCredits = "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭";
     if (module.exports.config.credits !== correctCredits) {
-        throw new Error("❌ Credits Locked By ARIF-BABU");
+        throw new Error("❌ Credits Modified! Please restore 𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭");
     }
 }
 
@@ -41,7 +41,6 @@ function getVideoID(url) {
     return match ? match[1] : null;
 }
 
-// --- Main Logic ---
 module.exports.onCall = async function ({ api, event, args }) {
     const { threadID, messageID } = event;
     
@@ -63,7 +62,6 @@ module.exports.onCall = async function ({ api, event, args }) {
             videoID = result.videos[0].videoId;
         }
 
-        // API URL setup
         const apiBase = await baseApiUrl();
         const apiUrl = `${apiBase}/ytDl3?link=${videoID}&format=mp3`;
         const response = await axios.get(apiUrl);
@@ -86,8 +84,8 @@ module.exports.onCall = async function ({ api, event, args }) {
         } catch (e) {}
 
         return api.sendMessage({
-            body: `  »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««
-          🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉\n🎵 Title: ${title}\n📥 Download: ${shortLink}`,
+            body: ` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««
+          🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉: ${title}\n📥 Download: ${shortLink}\n\n🔒 𝐄𝐧𝐝-𝐭𝐨-𝐄𝐧𝐝 𝐄𝐧𝐜𝐫𝐲𝐩𝐭𝐞𝐝 𝐆𝐫𝐨𝐮𝐩`,
             attachment: await getStreamFromURL(downloadLink, `${title}.mp3`)
         }, threadID, messageID);
 
